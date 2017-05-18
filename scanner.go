@@ -18,6 +18,7 @@ type ClamScanner struct {
 	directory string
 	size      int64
 	wait      time.Duration
+	dryRun    bool
 	replace   bool
 
 	quit     int32
@@ -44,11 +45,12 @@ func md5File(path string) ([]byte, error) {
 	return hash.Sum(result), nil
 }
 
-func NewClamScanner(replace bool, directory string, size int64, wait time.Duration, logger *Logger, database *bolt.DB, queue *ScanQueue) *ClamScanner {
+func NewClamScanner(dryRun, replace bool, directory string, size int64, wait time.Duration, logger *Logger, database *bolt.DB, queue *ScanQueue) *ClamScanner {
 	return &ClamScanner{
 		directory: directory,
 		size:      size,
 		wait:      wait,
+		dryRun:    dryRun,
 		replace:   replace,
 		quit:      0,
 		quitting:  make(chan bool, 1),
@@ -188,14 +190,18 @@ func (c *ClamScanner) Stop() {
 }
 
 func (c *ClamScanner) Clean(path string) { // this needs to be thread safe
-	if c.replace {
-		replacement := []byte("This file has been removed because it was marked as a virus.")
-		if err := ioutil.WriteFile(path, replacement, 0644); err != nil {
-			c.logger.Error("UNABLE TO REPLACE VIRUS FOUND AT '%s'", path)
-		}
+	if c.dryRun {
+		c.logger.Warn("Found virus at '%s', but skipping removal because dry-run flag enabled.", path)
 	} else {
-		if err := os.Remove(path); err != nil {
-			c.logger.Error("UNABLE TO REMOVE VIRUS FOUND AT '%s'", path)
+		if c.replace {
+			replacement := []byte("This file has been removed because it was marked as a virus.")
+			if err := ioutil.WriteFile(path, replacement, 0644); err != nil {
+				c.logger.Error("UNABLE TO REPLACE VIRUS FOUND AT '%s'", path)
+			}
+		} else {
+			if err := os.Remove(path); err != nil {
+				c.logger.Error("UNABLE TO REMOVE VIRUS FOUND AT '%s'", path)
+			}
 		}
 	}
 }
