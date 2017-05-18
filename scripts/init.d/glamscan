@@ -20,10 +20,10 @@ LOCKFILE=/var/lock/subsys/$prog
 GLAMSCAN=/usr/bin/$prog
 
 start() {
-    [ -x $exec ] || exit 5
+    [ -x $GLAMSCAN ] || exit 5
     [ -n "$GLAMSCAN_OPTIONS" ] || exit 4
 
-    daemon $GLAMSCAN $GLAMSCAN_OPTIONS
+    daemon $GLAMSCAN $GLAMSCAN_OPTIONS 2>&1 &
 
     RETVAL=$?
     [ $RETVAL -eq 0 ] && touch $LOCKFILE

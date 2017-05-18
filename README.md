@@ -35,7 +35,7 @@ Assuming you would want to install this on a CentOS 6 based system you'd do this
 
 You can adjust the daemon options in `/etc/glamscan` like follows:
 
-    echo 'GLAMSCAN_OPTIONS="-address clamav.myhost.com -directory /path/to/scan -syslog -replace"' /etc/glamscan
+    echo 'GLAMSCAN_OPTIONS="-address clamav.myhost.com -directory /path/to/scan -syslog -replace"' > /etc/glamscan
 
 Then start up the service
 
