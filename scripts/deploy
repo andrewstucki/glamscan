@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+if [ ! -z "$TRAVIS_TAG" ]; then
+  ghr --username andrewstucki --repository glamscan $TRAVIS_TAG "$DIR/build"
+fi

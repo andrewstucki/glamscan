@@ -1,0 +1,10 @@
+hash: 446ded242bb2169315a82b5a0e4f1c1fcb46797778a726490b6ef9cd50535261
+updated: 2017-05-17T18:47:31.963794401-05:00
+imports:
+- name: github.com/boltdb/bolt
+  version: 583e8937c61f1af6513608ccc75c97b6abdf4ff9
+- name: golang.org/x/sys
+  version: f3918c30c5c2cb527c0b071a27c35120a6c0719a
+  subpackages:
+  - unix
+testImports: []

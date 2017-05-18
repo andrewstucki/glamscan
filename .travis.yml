@@ -1,0 +1,20 @@
+sudo: false
+
+language: go
+
+go:
+  - 1.7.4
+
+before_install:
+  - go get -v github.com/Masterminds/glide
+  - go get -v github.com/mitchellh/gox
+  - go get -v github.com/tcnksm/ghr
+
+install:
+  - glide install
+
+script:
+  - gox -output="build/{{.Dir}}_{{.OS}}_{{.Arch}}" -arch="amd64" -os="linux darwin windows"
+
+after_success:
+  - ./scripts/deploy
