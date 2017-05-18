@@ -51,6 +51,7 @@ func main() {
 	// handle ctrl+c
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, os.Kill)
 
 	database, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
