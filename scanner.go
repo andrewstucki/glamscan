@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/md5"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -62,10 +61,10 @@ var END = errors.New("terminate")
 func (c *ClamScanner) Start() {
 	go func() {
 		for {
-			var found uint64 = 0
-			var okFiles uint64 = 0
-			var errored uint64 = 0
-			var skipped uint64 = 0
+			var found uint64
+			var okFiles uint64
+			var errored uint64
+			var skipped uint64
 			start := time.Now()
 
 			if atomic.LoadInt32(&c.quit) == 0 {
@@ -78,7 +77,7 @@ func (c *ClamScanner) Start() {
 				}
 				if info.Size() > c.size {
 					c.logger.Debug("Skipping %s due to large file size", path)
-					skipped += 1
+					skipped++
 					return nil
 				}
 				if err != nil {
@@ -160,12 +159,13 @@ func (c *ClamScanner) Start() {
 
 				wg.Wait()
 				c.logger.Info("Finished scan of '%s' in %f seconds", c.directory, time.Now().Sub(start).Seconds())
-				fmt.Printf("===========================\nResults:\n")
-				fmt.Printf("  Skipped files: %d\n", skipped)
-				fmt.Printf("  Scanned files:\n")
-				fmt.Printf("    Ok: %d\n", okFiles)
-				fmt.Printf("    Errors: %d\n", errored)
-				fmt.Printf("    Viruses: %d\n", found)
+				c.logger.Print("===========================")
+				c.logger.Print("Results:")
+				c.logger.Print("  Skipped files: %d", skipped)
+				c.logger.Print("  Scanned files:")
+				c.logger.Print("    Ok: %d", okFiles)
+				c.logger.Print("    Errors: %d", errored)
+				c.logger.Print("    Viruses: %d", found)
 
 				select {
 				case <-c.quitting: // interrupt the wait

@@ -12,6 +12,7 @@ type Logger struct {
 
 	debugLog   *log.Logger
 	infoLog    *log.Logger
+	printLog   *log.Logger // like info except no logging info
 	warningLog *log.Logger
 	errorLog   *log.Logger
 }
@@ -22,6 +23,7 @@ func NewLogger(debugEnabled bool, debugOut, infoOut, warningOut, errorOut io.Wri
 		debugEnabled: debugEnabled,
 		debugLog:     log.New(debugOut, "[DEBUG] ", log.Ldate|log.Ltime),
 		infoLog:      log.New(infoOut, "[INFO] ", log.Ldate|log.Ltime),
+		printLog:     log.New(infoOut, "", 0),
 		warningLog:   log.New(warningOut, "[WARN] ", log.Ldate|log.Ltime),
 		errorLog:     log.New(errorOut, "[ERROR] ", log.Ldate|log.Ltime),
 	}
@@ -37,6 +39,11 @@ func (l *Logger) Debug(message string, args ...interface{}) {
 // Info always logs
 func (l *Logger) Info(message string, args ...interface{}) {
 	l.infoLog.Printf(message, args...)
+}
+
+// Print always logs
+func (l *Logger) Print(message string, args ...interface{}) {
+	l.printLog.Printf(message, args...)
 }
 
 // Warn always logs

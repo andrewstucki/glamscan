@@ -28,12 +28,13 @@ func main() {
 	flag.StringVar(&directory, "directory", "", "The directory of files to scan (required).")
 	flag.Int64Var(&size, "size", 26214400, "The maximum byte size of files to scan (should be equal to or less than clamd configuration).")
 	flag.IntVar(&port, "port", 3310, "The port that clamAV is running on.")
-	flag.StringVar(&dbFile, "database", "glamscan.db", "The database of files that have been scanned")
+	flag.StringVar(&dbFile, "database", "glamscan.db", "The database of files that have been scanned.")
 	flag.IntVar(&concurrency, "concurrency", 10, "How many files should we scan at a time.")
 	flag.IntVar(&timeout, "timeout", 2, "Socket level timeout for tcp connection in seconds.")
 	flag.BoolVar(&version, "version", false, "Print version and exit.")
-	flag.IntVar(&sleep, "sleep", 60, "How many seconds to wait between scans")
+	flag.IntVar(&sleep, "sleep", 60, "How many seconds to wait between scans.")
 	flag.BoolVar(&debug, "debug", false, "Turn on debugging.")
+
 	flag.Parse()
 
 	if version {
@@ -71,7 +72,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	logger := NewLogger(debug, os.Stdout, os.Stdout, os.Stdout, os.Stderr)
+	logger := initializeSystemLogger(debug)
 
 	queue, err := NewScanQueue(logger, concurrency, ClamConfiguration{
 		Protocol: "tcp",
