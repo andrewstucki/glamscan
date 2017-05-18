@@ -24,6 +24,7 @@ func main() {
 	var version bool
 	var sleep int
 	var size int64
+	var replace bool
 	flag.StringVar(&address, "address", "", "The address of the clamAV server (required).")
 	flag.StringVar(&directory, "directory", "", "The directory of files to scan (required).")
 	flag.Int64Var(&size, "size", 26214400, "The maximum byte size of files to scan (should be equal to or less than clamd configuration).")
@@ -34,6 +35,7 @@ func main() {
 	flag.BoolVar(&version, "version", false, "Print version and exit.")
 	flag.IntVar(&sleep, "sleep", 60, "How many seconds to wait between scans.")
 	flag.BoolVar(&debug, "debug", false, "Turn on debugging.")
+	flag.BoolVar(&replace, "replace", false, "Replace any found virus files instead of removing them.")
 
 	flag.Parse()
 
@@ -88,7 +90,7 @@ func main() {
 	queue.Start()
 	defer queue.Stop()
 
-	scanner := NewClamScanner(directory, size, time.Duration(sleep)*time.Second, logger, database, queue)
+	scanner := NewClamScanner(replace, directory, size, time.Duration(sleep)*time.Second, logger, database, queue)
 	scanner.Start()
 	defer scanner.Stop()
 

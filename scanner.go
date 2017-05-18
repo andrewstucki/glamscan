@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -17,6 +18,7 @@ type ClamScanner struct {
 	directory string
 	size      int64
 	wait      time.Duration
+	replace   bool
 
 	quit     int32
 	quitting chan bool
@@ -42,11 +44,12 @@ func md5File(path string) ([]byte, error) {
 	return hash.Sum(result), nil
 }
 
-func NewClamScanner(directory string, size int64, wait time.Duration, logger *Logger, database *bolt.DB, queue *ScanQueue) *ClamScanner {
+func NewClamScanner(replace bool, directory string, size int64, wait time.Duration, logger *Logger, database *bolt.DB, queue *ScanQueue) *ClamScanner {
 	return &ClamScanner{
 		directory: directory,
 		size:      size,
 		wait:      wait,
+		replace:   replace,
 		quit:      0,
 		quitting:  make(chan bool, 1),
 		done:      make(chan bool),
@@ -141,7 +144,7 @@ func (c *ClamScanner) Start() {
 							if err != nil {
 								c.logger.Error("Error while updating historical virus database for '%s': %s", path, err.Error())
 							}
-							go c.Clean(path)
+							c.Clean(path)
 							break
 						}
 					}()
@@ -185,8 +188,14 @@ func (c *ClamScanner) Stop() {
 }
 
 func (c *ClamScanner) Clean(path string) { // this needs to be thread safe
-	err := os.Remove(path)
-	if err != nil {
-		c.logger.Error("UNABLE TO REMOVE VIRUS FOUND AT '%s'", path)
+	if c.replace {
+		replacement := []byte("This file has been removed because it was marked as a virus.")
+		if err := ioutil.WriteFile(path, replacement, 0644); err != nil {
+			c.logger.Error("UNABLE TO REPLACE VIRUS FOUND AT '%s'", path)
+		}
+	} else {
+		if err := os.Remove(path); err != nil {
+			c.logger.Error("UNABLE TO REMOVE VIRUS FOUND AT '%s'", path)
+		}
 	}
 }
