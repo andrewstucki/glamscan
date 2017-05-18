@@ -1,0 +1,12 @@
+[Unit]
+Description=Remote Virus Scanner
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/sysconfig/glamscan
+ExecStart=/usr/bin/glamscan $GLAMSCAN_OPTS
+ExecStop=/usr/bin/kill -INT $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
